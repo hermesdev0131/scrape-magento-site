@@ -11,3 +11,7 @@ ENV/
 
 # IDE and editor files
 .vscode/
+temp.py
+start.py
+test_api.py
+__pycache__/
