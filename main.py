@@ -13,6 +13,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 import time
 import logging
+import asyncio
 
 # Import the scraper class from existing module
 from scraper import MagentoEndpointScraper
@@ -29,7 +30,8 @@ app = FastAPI(title="Magento Scraper API")
 scraping_status: Dict[str, Any] = {
     'is_running': False,
     'last_run': None,
-    'last_result': None,
+    'last_result': None,        # summary
+    'last_full_result': None,   # full JSON including products
     'error': None
 }
 
@@ -70,6 +72,7 @@ def run_scrape(urls: List[str], max_pages: Optional[int] = None) -> Dict[str, An
             'duration_sec': duration,
         }
 
+        # Save summary and full result (with products)
         scraping_status['last_result'] = {
             'total_collections': result['total_collections'],
             'total_products': result['total_products'],
@@ -78,6 +81,7 @@ def run_scrape(urls: List[str], max_pages: Optional[int] = None) -> Dict[str, An
             'mode': result['mode'],
             'duration_sec': result['duration_sec'],
         }
+        scraping_status['last_full_result'] = result
         scraping_status['last_run'] = result['scraped_at']
 
         logging.info(
@@ -125,9 +129,26 @@ def scrape(req: ScrapeRequest):
 
 
 @app.post('/scrape_async')
-def scrape_async(req: ScrapeRequest, background_tasks: BackgroundTasks):
-    """Starts scraping in the background and returns immediately with status."""
+async def scrape_async(
+    req: ScrapeRequest,
+    background_tasks: BackgroundTasks,
+    wait: bool = False,
+    timeout: int = 120,
+):
+    """Starts scraping in the background.
+    - If wait=true, waits up to `timeout` seconds and returns the full JSON (including products).
+    - Otherwise returns an immediate acknowledgement.
+    """
     if scraping_status['is_running']:
+        if wait:
+            # Wait for completion or timeout
+            deadline = time.time() + max(1, timeout)
+            while scraping_status['is_running'] and time.time() < deadline:
+                await asyncio.sleep(1)
+            # Return result if completed
+            if not scraping_status['is_running'] and scraping_status.get('last_full_result') is not None:
+                return scraping_status['last_full_result']
+            return {'status': 'running'}
         return {'status': 'running'}
 
     urls = [str(u) for u in req.collection_urls]
@@ -138,6 +159,16 @@ def scrape_async(req: ScrapeRequest, background_tasks: BackgroundTasks):
 
     # queue background task
     background_tasks.add_task(run_scrape, urls, req.max_pages)
+
+    if wait:
+        # Wait for completion or timeout
+        deadline = time.time() + max(1, timeout)
+        while scraping_status['is_running'] and time.time() < deadline:
+            await asyncio.sleep(1)
+        if not scraping_status['is_running'] and scraping_status.get('last_full_result') is not None:
+            return scraping_status['last_full_result']
+        return {'status': 'running'}
+
     return {'status': 'accepted'}
 
 
