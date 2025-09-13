@@ -165,8 +165,8 @@ class MagentoEndpointScraper:
                         if 'product' in response.text.lower():
                             category_products = self.extract_from_html_json(response.text)
                             if category_products:
-                                print(f"✅ Extracted {len(category_products)} products from HTML structure")
-                                print(f"📄 Page {page}: Found {len(category_products)} products")
+                                # print(f"✅ Extracted {len(category_products)} products from HTML structure")
+                                # print(f"📄 Page {page}: Found {len(category_products)} products")
                                 all_products.extend(category_products)
                                 
                                 # Enhanced threshold: 500 vs 50
@@ -212,15 +212,15 @@ class MagentoEndpointScraper:
                 try:
                     data = json.loads(match)
                     if isinstance(data, list) and len(data) > 0:
-                        print(
-                            f"✅ Extracted {len(data)} products from HTML JSON")
+                        # print(
+                        #     f"✅ Extracted {len(data)} products from HTML JSON")
                         return data
                     elif isinstance(data, dict) and 'products' in data:
                         products = data['products']
                         if isinstance(products, list):
-                            print(
-                                f"✅ Extracted {len(products)} products from HTML JSON"
-                            )
+                            # print(
+                            #     f"✅ Extracted {len(products)} products from HTML JSON"
+                            # )
                             return products
                 except:
                     continue
@@ -246,7 +246,7 @@ class MagentoEndpointScraper:
                 products.append(product_info)
 
         if products:
-            print(f"✅ Extracted {len(products)} products from HTML structure")
+            # print(f"✅ Extracted {len(products)} products from HTML structure")
             return products
 
         # Fallback: try simpler pattern for product names and prices
@@ -337,9 +337,9 @@ class MagentoEndpointScraper:
             products.append(current_product)
 
         if products:
-            print(
-                f"✅ Extracted {len(products)} products using simple pattern matching"
-            )
+            # print(
+            #     f"✅ Extracted {len(products)} products using simple pattern matching"
+            # )
             return products
 
         return None
@@ -486,10 +486,10 @@ class MagentoEndpointScraper:
                                 best = v
                                 best_norm = norm
                         if best:
-                            print(f"  🎯 Smallest size: {best['size']}")
+                            # print(f"  🎯 Smallest size: {best['size']}")
                             return best
                         # Fallback
-                        print(f"  📦 Using available size: {variants[0]['size']}")
+                        # print(f"  📦 Using available size: {variants[0]['size']}")
                         return variants[0]
 
                 # Fallback: look for any size mentions in product description
@@ -606,8 +606,8 @@ class MagentoEndpointScraper:
         if product_info['size'] in ['N/A', 'Various sizes available'] and source in ['search', 'category']:
             product_url = product_data.get('url') or product_data.get('link') or product_data.get('product_url')
             if product_url:
-                print(
-                    f"🔍 Fetching size variants for {product_info['name']}...")
+                # print(
+                #     f"🔍 Fetching size variants for {product_info['name']}...")
 
                 variant_data = self.fetch_product_variants(product_url)
                 if variant_data['size'] != 'Various sizes available':
@@ -615,9 +615,9 @@ class MagentoEndpointScraper:
                     # Update price with variant-specific price if available
                     if variant_data['price'] != 'N/A':
                         product_info['price'] = variant_data['price']
-                    print(
-                        f"  ✅ Found size: {variant_data['size']} - {variant_data['price']}"
-                    )
+                    # print(
+                    #     f"  ✅ Found size: {variant_data['size']} - {variant_data['price']}"
+                    # )
                 else:
                     print(f"  ❌ No size variants found")
 
@@ -647,9 +647,9 @@ class MagentoEndpointScraper:
                             response.text)
                         if page_products:
                             all_products.extend(page_products)
-                            print(
-                                f"📄 Page {page}: Found {len(page_products)} products"
-                            )
+                            # print(
+                            #     f"📄 Page {page}: Found {len(page_products)} products"
+                            # )
                         else:
                             # No products found, likely reached end
                             break
@@ -671,7 +671,7 @@ class MagentoEndpointScraper:
 
     def scrape_products(self, urls: Optional[List[str]] = None) -> List[Dict]:
         """Scrape products using provided page/category URLs. Falls back to defaults if none provided."""
-        print(f"🚀 Starting fast endpoint-based scraping for: {self.base_url}")
+        # print(f"🚀 Starting fast endpoint-based scraping for: {self.base_url}")
         start_time = time.time()
 
         products: List[Dict] = []
@@ -683,7 +683,7 @@ class MagentoEndpointScraper:
         for url in urls:
             try:
                 paginated_products = self.extract_with_pagination(url, max_pages=30)
-                print(f"📦 Total paginated products found from {url}: {len(paginated_products)}")
+                # print(f"📦 Total paginated products found from {url}: {len(paginated_products)}")
                 if paginated_products:
                     for product in paginated_products:
                         # Avoid duplicates by checking if product already exists
@@ -696,7 +696,7 @@ class MagentoEndpointScraper:
 
         elapsed_time = time.time() - start_time
         print(f"\n⚡ Scraping completed in {elapsed_time:.2f} seconds")
-        print(f"📦 Total products found: {len(products)}")
+        # print(f"📦 Total products found: {len(products)}")
 
         return products
 

@@ -184,14 +184,14 @@ def status():
 
 if __name__ == '__main__':
     # Local dev server start (uvicorn)
-    print("🚀 Starting Magento Scraper FastAPI Server...")
-    print("Available endpoints:")
-    print("  GET  /health       - Health check")
-    print("  POST /scrape       - Run scraping synchronously and return results")
-    print("  POST /scrape_async - Start scraping in background and return immediately")
-    print("  GET  /status       - Check scrape status and last result")
-    print("\nServer starting on http://0.0.0.0:8000")
-    print("=" * 60)
+    # print("🚀 Starting Magento Scraper FastAPI Server...")
+    # print("Available endpoints:")
+    # print("  GET  /health       - Health check")
+    # print("  POST /scrape       - Run scraping synchronously and return results")
+    # print("  POST /scrape_async - Start scraping in background and return immediately")
+    # print("  GET  /status       - Check scrape status and last result")
+    # print("\nServer starting on http://0.0.0.0:8000")
+    # print("=" * 60)
 
     # Import here to keep uvicorn optional at import-time
     import uvicorn
